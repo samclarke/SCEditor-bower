@@ -212,7 +212,7 @@
 					function (id) {
 						editor.insertText(
 							'<iframe width="560" height="315" ' +
-							'src="http://www.youtube.com/embed/{id}?' +
+							'src="https://www.youtube.com/embed/{id}?' +
 							'wmode=opaque" data-youtube-id="' + id + '" ' +
 							'frameborder="0" allowfullscreen></iframe>'
 						);
@@ -250,7 +250,7 @@
 
 		/**
 		 * Array containing the output, used as it's faster
-		 * than string concation in slow browsers.
+		 * than string concatenation in slow browsers.
 		 * @type {Array}
 		 * @private
 		 */
@@ -427,7 +427,7 @@
 			while (attrIdx--) {
 				attr = node.attributes[attrIdx];
 
-				// IE < 8 returns all possible attribtues not just specified
+				// IE < 8 returns all possible attributes not just specified
 				// ones. IE < 8 also doesn't say value on input is specified
 				// so just assume it is.
 				if (!SCEditor.ie || attr.specified ||
@@ -723,6 +723,10 @@
 				return true;
 			}
 
+			if ($(node).hasClass('sceditor-ignore')) {
+				return true;
+			}
+
 			if (!dom.canHaveChildren(node)) {
 				return false;
 			}
@@ -734,7 +738,7 @@
 
 			while (childrenLength--) {
 				if (!isEmpty(childNodes[childrenLength],
-					!node.previousSibling && !node.nextSibling)) {
+					excludeBr && !node.previousSibling && !node.nextSibling)) {
 					return false;
 				}
 			}
@@ -747,20 +751,23 @@
 		 * tags are white listed it will remove any tags that
 		 * are black listed.
 		 *
-		 * @param  {Node} node
+		 * @param  {Node} rootNode
 		 * @return {Void}
 		 * @private
 		 */
-		removeTags = function (node) {
-			dom.traverse(node, function (node) {
+		removeTags = function (rootNode) {
+			dom.traverse(rootNode, function (node) {
 				var	remove,
 					tagName         = node.nodeName.toLowerCase(),
-					empty           = tagName !== 'iframe' && isEmpty(node),
 					parentNode      = node.parentNode,
 					nodeType        = node.nodeType,
 					isBlock         = !dom.isInline(node),
 					previousSibling = node.previousSibling,
 					nextSibling     = node.nextSibling,
+					isTopLevel      = parentNode === rootNode,
+					noSiblings      = !previousSibling && !nextSibling,
+					empty           = tagName !== 'iframe' && isEmpty(node,
+						isTopLevel && noSiblings && tagName !== 'br'),
 					document        = node.ownerDocument,
 					allowedtags     = sceditorPlugins.xhtml.allowedTags,
 					disallowedTags  = sceditorPlugins.xhtml.disallowedTags;

@@ -1794,11 +1794,10 @@
 				// Skips selection makers and ignored elements
 				// Skip empty inline elements
 				while (previousSibling &&
-					($(previousSibling).hasClass('sceditor-ignore') ||
-						(previousSibling.nodeType === 1 &&
-							!$(previousSibling).is('br') &&
-							isInline(previousSibling, true) &&
-							!previousSibling.firstChild))) {
+						previousSibling.nodeType === 1 &&
+						!$(previousSibling).is('br') &&
+						isInline(previousSibling, true) &&
+						!previousSibling.firstChild) {
 					previousSibling = previousSibling.previousSibling;
 				}
 
@@ -1809,10 +1808,6 @@
 				do {
 					parent          = element.parentNode;
 					parentLastChild = parent.lastChild;
-
-					while ($(parentLastChild).hasClass('sceditor-ignore')) {
-						parentLastChild = parentLastChild.previousSibling;
-					}
 
 					isLastBlockChild = parentLastChild === element;
 					element = parent;
@@ -1874,6 +1869,10 @@
 			}
 
 			SCEditor.dom.removeWhiteSpace($body[0]);
+
+			// Remove all the stuff that is meant to be ignored
+			$('.sceditor-ignore', $body).remove();
+
 			bbcode = base.elementToBbcode($body);
 
 			if ($tmpContainer) {
@@ -1934,11 +1933,6 @@
 					}
 
 					if (nodeType === 1) {
-						// skip ignored elements
-						if ($node.hasClass('sceditor-ignore')) {
-							return;
-						}
-
 						// skip empty nlf elements (new lines automatically
 						// added after block level elements like quotes)
 						if ($node.hasClass('sceditor-nlf')) {
@@ -2665,7 +2659,7 @@
 				return element ? '[youtube]' + element + '[/youtube]' : content;
 			},
 			html: '<iframe width="560" height="315" frameborder="0" ' +
-				'src="http://www.youtube.com/embed/{0}?wmode=opaque" ' +
+				'src="https://www.youtube.com/embed/{0}?wmode=opaque" ' +
 				'data-youtube-id="{0}" allowfullscreen></iframe>'
 		},
 		// END_COMMAND
