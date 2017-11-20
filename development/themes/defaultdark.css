@@ -1,276 +1,153 @@
+/*! SCEditor | (C) 2017, Sam Clarke | sceditor.com/license */
 /**
- * SCEditor
- * http://www.ssceditor.com/
+ * Default SCEditor
+ * http://www.sceditor.com/
  *
- * Copyright (C) 2011-12, Sam Clarke (samclarke.com)
+ * Copyright (C) 2017, Sam Clarke
  *
  * SCEditor is licensed under the MIT license:
  *	http://www.opensource.org/licenses/mit-license.php
  */
-@font-face {
-  font-family: 'Monocons';
-  src: url('monocons//monocons.eot');
-  src: url('monocons//monocons.eot?#iefix') format('embedded-opentype'), url('monocons//monocons.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-.sceditor-button div:before,
-div.sceditor-grip {
-  font-family: 'Monocons';
-  font-size: 16px;
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
+div.sceditor-grip,
+.sceditor-button div {
+  background-image: url("famfamfam.png");
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
 }
 .sceditor-button-youtube div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e000');
-}
-.sceditor-button-unlink div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e001');
-}
-.sceditor-button-underline div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e002');
-}
-.sceditor-button-time div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e003');
-}
-.sceditor-button-table div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e004');
-}
-.sceditor-button-superscript div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e005');
-}
-.sceditor-button-subscript div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e006');
-}
-.sceditor-button-strike div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e007');
-}
-.sceditor-button-source div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e008');
-}
-.sceditor-button-size div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e009');
-}
-.sceditor-button-rtl div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00a');
-}
-.sceditor-button-right div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00b');
-}
-.sceditor-button-removeformat div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00c');
-}
-.sceditor-button-quote div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00d');
-}
-.sceditor-button-print div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00e');
-}
-.sceditor-button-pastetext div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e00f');
-}
-.sceditor-button-paste div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e010');
-}
-.sceditor-button-orderedlist div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e011');
-}
-.sceditor-button-maximize div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e012');
-}
-.sceditor-button-ltr div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e013');
+  background-position: 0px 0px;
 }
 .sceditor-button-link div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e014');
+  background-position: 0px -16px;
+}
+.sceditor-button-unlink div {
+  background-position: 0px -32px;
+}
+.sceditor-button-underline div {
+  background-position: 0px -48px;
+}
+.sceditor-button-time div {
+  background-position: 0px -64px;
+}
+.sceditor-button-table div {
+  background-position: 0px -80px;
+}
+.sceditor-button-superscript div {
+  background-position: 0px -96px;
+}
+.sceditor-button-subscript div {
+  background-position: 0px -112px;
+}
+.sceditor-button-strike div {
+  background-position: 0px -128px;
+}
+.sceditor-button-source div {
+  background-position: 0px -144px;
+}
+.sceditor-button-size div {
+  background-position: 0px -160px;
+}
+.sceditor-button-rtl div {
+  background-position: 0px -176px;
+}
+.sceditor-button-right div {
+  background-position: 0px -192px;
+}
+.sceditor-button-removeformat div {
+  background-position: 0px -208px;
+}
+.sceditor-button-quote div {
+  background-position: 0px -224px;
+}
+.sceditor-button-print div {
+  background-position: 0px -240px;
+}
+.sceditor-button-pastetext div {
+  background-position: 0px -256px;
+}
+.sceditor-button-paste div {
+  background-position: 0px -272px;
+}
+.sceditor-button-outdent div {
+  background-position: 0px -288px;
+}
+.sceditor-button-orderedlist div {
+  background-position: 0px -304px;
+}
+.sceditor-button-maximize div {
+  background-position: 0px -320px;
+}
+.sceditor-button-ltr div {
+  background-position: 0px -336px;
 }
 .sceditor-button-left div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e015');
+  background-position: 0px -352px;
 }
 .sceditor-button-justify div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e016');
+  background-position: 0px -368px;
 }
 .sceditor-button-italic div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e017');
+  background-position: 0px -384px;
+}
+.sceditor-button-indent div {
+  background-position: 0px -400px;
 }
 .sceditor-button-image div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e018');
+  background-position: 0px -416px;
 }
 .sceditor-button-horizontalrule div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e019');
+  background-position: 0px -432px;
 }
 .sceditor-button-format div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01c');
+  background-position: 0px -448px;
 }
 .sceditor-button-font div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01d');
+  background-position: 0px -464px;
 }
 .sceditor-button-emoticon div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01e');
+  background-position: 0px -480px;
 }
 .sceditor-button-email div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01f');
-}
-.sceditor-button-bold div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e020');
+  background-position: 0px -496px;
 }
 .sceditor-button-date div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e021');
+  background-position: 0px -512px;
 }
 .sceditor-button-cut div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e022');
+  background-position: 0px -528px;
 }
 .sceditor-button-copy div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e023');
+  background-position: 0px -544px;
 }
 .sceditor-button-color div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e024');
+  background-position: 0px -560px;
 }
 .sceditor-button-code div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e025');
+  background-position: 0px -576px;
 }
 .sceditor-button-center div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e026');
+  background-position: 0px -592px;
 }
 .sceditor-button-bulletlist div {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e027');
+  background-position: 0px -608px;
+}
+.sceditor-button-bold div {
+  background-position: 0px -624px;
 }
 div.sceditor-grip {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01b');
+  background-position: 0px -640px;
+  width: 10px;
+  height: 10px;
 }
 .rtl div.sceditor-grip {
-  *zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '\e01a');
-}
-.sceditor-button-youtube div:before {
-  content: "\e000";
-}
-.sceditor-button-unlink div:before {
-  content: "\e001";
-}
-.sceditor-button-underline div:before {
-  content: "\e002";
-}
-.sceditor-button-time div:before {
-  content: "\e003";
-}
-.sceditor-button-table div:before {
-  content: "\e004";
-}
-.sceditor-button-superscript div:before {
-  content: "\e005";
-}
-.sceditor-button-subscript div:before {
-  content: "\e006";
-}
-.sceditor-button-strike div:before {
-  content: "\e007";
-}
-.sceditor-button-source div:before {
-  content: "\e008";
-}
-.sceditor-button-size div:before {
-  content: "\e009";
-}
-.sceditor-button-rtl div:before {
-  content: "\e00a";
-}
-.sceditor-button-right div:before {
-  content: "\e00b";
-}
-.sceditor-button-removeformat div:before {
-  content: "\e00c";
-}
-.sceditor-button-quote div:before {
-  content: "\e00d";
-}
-.sceditor-button-print div:before {
-  content: "\e00e";
-}
-.sceditor-button-pastetext div:before {
-  content: "\e00f";
-}
-.sceditor-button-paste div:before {
-  content: "\e010";
-}
-.sceditor-button-orderedlist div:before {
-  content: "\e011";
-}
-.sceditor-button-maximize div:before {
-  content: "\e012";
-}
-.sceditor-button-ltr div:before {
-  content: "\e013";
-}
-.sceditor-button-link div:before {
-  content: "\e014";
-}
-.sceditor-button-left div:before {
-  content: "\e015";
-}
-.sceditor-button-justify div:before {
-  content: "\e016";
-}
-.sceditor-button-italic div:before {
-  content: "\e017";
-}
-.sceditor-button-image div:before {
-  content: "\e018";
-}
-.sceditor-button-horizontalrule div:before {
-  content: "\e019";
-}
-.sceditor-button-format div:before {
-  content: "\e01c";
-}
-.sceditor-button-font div:before {
-  content: "\e01d";
-}
-.sceditor-button-emoticon div:before {
-  content: "\e01e";
-}
-.sceditor-button-email div:before {
-  content: "\e01f";
-}
-.sceditor-button-bold div:before {
-  content: "\e020";
-}
-.sceditor-button-date div:before {
-  content: "\e021";
-}
-.sceditor-button-cut div:before {
-  content: "\e022";
-}
-.sceditor-button-copy div:before {
-  content: "\e023";
-}
-.sceditor-button-color div:before {
-  content: "\e024";
-}
-.sceditor-button-code div:before {
-  content: "\e025";
-}
-.sceditor-button-center div:before {
-  content: "\e026";
-}
-.sceditor-button-bulletlist div:before {
-  content: "\e027";
-}
-div.sceditor-grip:before {
-  content: "\e01b";
-}
-.rtl div.sceditor-grip:before {
-  content: "\e01a";
+  background-position: 0px -650px;
 }
 /**
  * SCEditor
- * http://www.ssceditor.com/
+ * http://www.sceditor.com/
  *
- * Copyright (C) 2011-12, Sam Clarke (samclarke.com)
+ * Copyright (C) 2017, Sam Clarke (samclarke.com)
  *
  * SCEditor is licensed under the MIT license:
  *	http://www.opensource.org/licenses/mit-license.php
@@ -282,6 +159,10 @@ div.sceditor-grip:before {
     More info at: http://lesselements.com
   ---------------------------------------------------*/
 .sceditor-container {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
   position: relative;
   background: #fff;
   border: 1px solid #d9d9d9;
@@ -290,6 +171,8 @@ div.sceditor-grip:before {
   color: #222;
   line-height: 1;
   font-weight: bold;
+  overflow: hidden;
+  height: 250px;
   border-radius: 4px;
   background-clip: padding-box;
 }
@@ -310,17 +193,44 @@ div.sceditor-dropdown div {
 }
 .sceditor-container iframe,
 .sceditor-container textarea {
-  line-height: 1;
+  display: block;
+  -ms-flex: 1 1 0%;
+  flex: 1 1 0%;
+  line-height: 1.25;
   border: 0;
   outline: none;
   font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   color: #111;
   padding: 0;
   margin: 5px;
   resize: none;
   background: #fff;
-  display: block;
+  height: auto !important;
+  width: auto !important;
+  width: calc(100% - 10px) !important;
+  min-height: 1px;
+}
+.sceditor-container textarea {
+  margin: 7px 5px;
+}
+div.sceditor-dnd-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 5px dashed #aaa;
+  z-index: 200;
+  font-size: 2em;
+  text-align: center;
+  color: #aaa;
+}
+div.sceditor-dnd-cover p {
+  position: relative;
+  top: 45%;
+  pointer-events: none;
 }
 div.sceditor-resize-cover {
   position: absolute;
@@ -332,14 +242,6 @@ div.sceditor-resize-cover {
   z-index: 10;
   opacity: 0.3;
 }
-.ie6 div.sceditor-resize-cover,
-.ie7 div.sceditor-resize-cover,
-.ie8 div.sceditor-resize-cover {
-  background: #efefef;
-}
-.sceditor-container.ie6 {
-  overflow: hidden;
-}
 div.sceditor-grip {
   overflow: hidden;
   width: 10px;
@@ -349,6 +251,10 @@ div.sceditor-grip {
   bottom: 0;
   right: 0;
   z-index: 3;
+  line-height: 0;
+}
+div.sceditor-grip.has-icon {
+  background-image: none;
 }
 .sceditor-maximize {
   position: fixed;
@@ -367,9 +273,6 @@ body.sceditor-maximize {
   padding: 0;
   margin: 0;
   overflow: hidden;
-}
-.ie6.sceditor-maximize {
-  position: absolute;
 }
 .sceditor-maximize div.sceditor-grip {
   display: none;
@@ -446,9 +349,11 @@ div.sceditor-fontsize-picker,
 div.sceditor-format {
   padding: 6px 0;
 }
-div.sceditor-emoticons,
-div.sceditor-more-emoticons,
 div.sceditor-color-picker {
+  padding: 4px;
+}
+div.sceditor-emoticons,
+div.sceditor-more-emoticons {
   padding: 0;
 }
 .sceditor-pastetext textarea {
@@ -489,18 +394,19 @@ div.sceditor-color-picker {
 }
 .sceditor-color-option {
   display: block;
-  border: 1px solid #fff;
-  height: 10px;
-  width: 10px;
+  border: 2px solid #fff;
+  height: 18px;
+  width: 18px;
   overflow: hidden;
 }
 .sceditor-color-option:hover {
-  border: 1px solid #333;
+  border: 1px solid #aaa;
 }
 /**
 	 * Toolbar styleing
 	 */
 div.sceditor-toolbar {
+  flex-shrink: 0;
   overflow: hidden;
   padding: 3px 5px 2px;
   background: #f7f7f7;
@@ -520,11 +426,6 @@ div.sceditor-group {
   border-radius: 3px;
   background-clip: padding-box;
 }
-.ie6 div.sceditor-group,
-.ie7 div.sceditor-group {
-  display: inline;
-  zoom: 1;
-}
 .sceditor-button {
   float: left;
   cursor: pointer;
@@ -533,26 +434,6 @@ div.sceditor-group {
   height: 20px;
   border-radius: 3px;
   background-clip: padding-box;
-  /* Needed for Safari 5? */
-  text-indent: -9999px;
-}
-.ie .sceditor-button {
-  text-indent: 0;
-}
-.ie6 .sceditor-button,
-.ie7 .sceditor-button {
-  float: none !important;
-  display: inline;
-  zoom: 1;
-}
-.ie6 .sceditor-button {
-  padding: 0;
-}
-.ie6 .sceditor-button div {
-  margin: 5px;
-}
-.ie7 .sceditor-button div {
-  margin: 5px 0;
 }
 .sceditor-button:hover,
 .sceditor-button:active,
@@ -573,7 +454,20 @@ div.sceditor-group {
 .sceditor-button div {
   display: block;
 }
+.sceditor-button svg {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  margin: 2px 0;
+  fill: #111;
+  pointer-events: none;
+  line-height: 1;
+}
+.sceditor-button.disabled svg {
+  fill: #888;
+}
 .sceditor-button div {
+  display: inline-block;
   margin: 2px 0;
   padding: 0;
   overflow: hidden;
@@ -581,8 +475,10 @@ div.sceditor-group {
   font-size: 0;
   color: transparent;
 }
+.sceditor-button.has-icon div {
+  display: none;
+}
 .sceditor-button.disabled div {
-  filter: alpha(opacity=30);
   opacity: 0.3;
 }
 .text .sceditor-button,
@@ -593,17 +489,23 @@ div.sceditor-group {
 .text-icon .sceditor-button div,
 .sceditor-button.text-icon,
 .sceditor-button.text-icon div {
+  display: inline-block;
   width: auto;
-  overflow: visible;
   line-height: 16px;
   font-size: 1em;
   color: inherit;
   text-indent: 0;
 }
+.text-icon .sceditor-button.has-icon div,
+.sceditor-button.has-icon div,
 .text .sceditor-button div,
 .sceditor-button.text div {
   padding: 0 2px;
   background: none;
+}
+.text .sceditor-button svg,
+.sceditor-button.text svg {
+  display: none;
 }
 .text-icon .sceditor-button div,
 .sceditor-button.text-icon div {
@@ -619,25 +521,21 @@ div.sceditor-group {
   right: auto;
   left: 0;
 }
-.ie7 .sceditor-button div,
-.ie6 .sceditor-button div {
-  font-family: 'Monocons';
-  overflow: visible;
-  font-size: 16px;
-  line-height: 1;
-  text-indent: 0;
+div.sceditor-toolbar {
+  background: #5d5d5d;
 }
-div.sceditor-grip {
-  height: 16px;
-  width: 16px;
+div.sceditor-group {
+  background: #303030;
+  border-bottom: 1px solid #000;
 }
-.sceditor-button div:before,
-div.sceditor-grip:before {
-  text-indent: 0;
-  line-height: 17px;
-  width: 16px;
-  height: 16px;
-  display: block;
-  color: #333;
-  text-shadow: 0 1px #fff;
+.sceditor-button:hover,
+.sceditor-button:active,
+.sceditor-button.active {
+  background: #6b6b6b;
+}
+.sceditor-button svg {
+  fill: #fff;
+}
+.sceditor-button.disabled svg {
+  fill: #777;
 }

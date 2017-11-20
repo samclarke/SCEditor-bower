@@ -1,7 +1,7 @@
-(function ($) {
+(function (sceditor) {
 	'use strict';
 
-	$.sceditor.plugins.undo = function () {
+	sceditor.plugins.undo = function () {
 		var base = this;
 		var editor;
 		var charChangedCount = 0;
@@ -38,7 +38,7 @@
 
 
 		/**
-		 * Caluclates the number of characters that have changed
+		 * Calculates the number of characters that have changed
 		 * between two strings.
 		 *
 		 * @param {String} strA
@@ -146,11 +146,11 @@
 		 *
 		 * e.rawValue will either be the raw HTML from the WYSIWYG editor with
 		 * the rangeHelper range markers inserted, or it will be the raw value
-		 * of the source editor (BBCode or HTML depening on plugins).
+		 * of the source editor (BBCode or HTML depending on plugins).
 		 * @return {void}
 		 */
 		base.signalValuechangedEvent = function (e) {
-			var rawValue = e.rawValue;
+			var rawValue = e.detail.rawValue;
 
 			if (undoLimit > 0 && undoStates.length > undoLimit) {
 				undoStates.shift();
@@ -184,4 +184,4 @@
 			previousValue = rawValue;
 		};
 	};
-}(jQuery));
+}(sceditor));

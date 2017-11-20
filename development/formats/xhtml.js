@@ -2,93 +2,71 @@
  * SCEditor XHTML Plugin
  * http://www.sceditor.com/
  *
- * Copyright (C) 2011-2013, Sam Clarke (samclarke.com)
+ * Copyright (C) 2017, Sam Clarke (samclarke.com)
  *
  * SCEditor is licensed under the MIT license:
  *	http://www.opensource.org/licenses/mit-license.php
  *
  * @author Sam Clarke
- * @requires jQuery
  */
-/*global prompt: true*/
-(function ($) {
+(function (sceditor) {
 	'use strict';
 
-	var SCEditor        = $.sceditor;
-	var sceditorPlugins = SCEditor.plugins;
-	var dom             = SCEditor.dom;
+	var dom = sceditor.dom;
+	var utils = sceditor.utils;
+
+	var css = dom.css;
+	var attr = dom.attr;
+	var is = dom.is;
+	var removeAttr = dom.removeAttr;
+	var convertElement = dom.convertElement;
+	var extend = utils.extend;
+	var each = utils.each;
+	var isEmptyObject = utils.isEmptyObject;
+
+	var getEditorCommand = sceditor.command.get;
 
 	var defaultCommandsOverrides = {
 		bold: {
-			txtExec: [
-				'<strong>',
-				'</strong>'
-			]
+			txtExec: ['<strong>', '</strong>']
 		},
 		italic: {
-			txtExec: [
-				'<em>',
-				'</em>'
-			]
+			txtExec: ['<em>', '</em>']
 		},
 		underline: {
-			txtExec: [
-				'<span style="text-decoration: underline;">',
-				'</span>'
-			]
+			txtExec: ['<span style="text-decoration:underline;">', '</span>']
 		},
 		strike: {
-			txtExec: [
-				'<span style="text-decoration: line-through;">',
-				'</span>'
-			]
+			txtExec: ['<span style="text-decoration:line-through;">', '</span>']
 		},
 		subscript: {
-			txtExec: [
-				'<sub>',
-				'</sub>'
-			]
+			txtExec: ['<sub>', '</sub>']
 		},
 		superscript: {
-			txtExec: [
-				'<sup>',
-				'</sup>'
-			]
+			txtExec: ['<sup>', '</sup>']
 		},
 		left: {
-			txtExec: [
-				'<div style="text-align: left;">',
-				'</div>'
-			]
+			txtExec: ['<div style="text-align:left;">', '</div>']
 		},
 		center: {
-			txtExec: [
-				'<div style="text-align: center;">',
-				'</div>'
-			]
+			txtExec: ['<div style="text-align:center;">', '</div>']
 		},
 		right: {
-			txtExec: [
-				'<div style="text-align: right;">',
-				'</div>'
-			]
+			txtExec: ['<div style="text-align:right;">', '</div>']
 		},
 		justify: {
-			txtExec: [
-				'<div style="text-align: justify;">',
-				'</div>'
-			]
+			txtExec: ['<div style="text-align:justify;">', '</div>']
 		},
 		font: {
 			txtExec: function (caller) {
 				var editor = this;
 
-				SCEditor.command.get('font')._dropDown(
+				getEditorCommand('font')._dropDown(
 					editor,
 					caller,
-					function (fontName) {
-						editor.insertText('<span style="font-family: ' +
-							fontName + ';">', '</span>');
+					function (font) {
+						editor.insertText('<span style="font-family:' +
+							font + ';">', '</span>');
 					}
 				);
 			}
@@ -97,12 +75,12 @@
 			txtExec: function (caller) {
 				var editor = this;
 
-				SCEditor.command.get('size')._dropDown(
+				getEditorCommand('size')._dropDown(
 					editor,
 					caller,
-					function (fontSize) {
-						editor.insertText('<span style="font-size: ' +
-							fontSize + ';">', '</span>');
+					function (size) {
+						editor.insertText('<span style="font-size:' +
+							size + ';">', '</span>');
 					}
 				);
 			}
@@ -111,109 +89,107 @@
 			txtExec: function (caller) {
 				var editor = this;
 
-				SCEditor.command.get('color')._dropDown(
+				getEditorCommand('color')._dropDown(
 					editor,
 					caller,
 					function (color) {
-						editor.insertText('<span style="color: ' +
+						editor.insertText('<span style="color:' +
 							color + ';">', '</span>');
 					}
 				);
 			}
 		},
 		bulletlist: {
-			txtExec: [
-				'<ul><li>',
-				'</li></ul>'
-			]
+			txtExec: ['<ul><li>', '</li></ul>']
 		},
 		orderedlist: {
-			txtExec: [
-				'<ol><li>',
-				'</li></ol>'
-			]
+			txtExec: ['<ol><li>', '</li></ol>']
 		},
 		table: {
-			txtExec: [
-				'<table><tr><td>',
-				'</td></tr></table>'
-			]
+			txtExec: ['<table><tr><td>', '</td></tr></table>']
 		},
 		horizontalrule: {
-			txtExec: [
-				'<hr />'
-			]
+			txtExec: ['<hr />']
 		},
 		code: {
-			txtExec: [
-				'<code>',
-				'</code>'
-			]
+			txtExec: ['<code>', '</code>']
 		},
 		image: {
 			txtExec: function (caller, selected) {
-				var url = prompt(this._('Enter the image URL:'), selected);
+				var	editor  = this;
 
-				if (url) {
-					this.insertText('<img src="' + url + '" />');
-				}
+				getEditorCommand('image')._dropDown(
+					editor,
+					caller,
+					selected,
+					function (url, width, height) {
+						var attrs  = '';
+
+						if (width) {
+							attrs += ' width="' + width + '"';
+						}
+
+						if (height) {
+							attrs += ' height="' + height + '"';
+						}
+
+						editor.insertText(
+							'<img' + attrs + ' src="' + url + '" />'
+						);
+					}
+				);
 			}
 		},
 		email: {
-			txtExec: function (caller, sel) {
-				var	email, text,
-					display = sel && sel.indexOf('@') > -1 ? null : sel;
+			txtExec: function (caller, selected) {
+				var	editor  = this;
 
-				email = prompt(
-					this._('Enter the e-mail address:'),
-					(display ? '' : sel)
+				getEditorCommand('email')._dropDown(
+					editor,
+					caller,
+					function (url, text) {
+						editor.insertText(
+							'<a href="mailto:' + url + '">' +
+								(text || selected || url) +
+							'</a>'
+						);
+					}
 				);
-
-				text = prompt(
-					this._('Enter the displayed text:'),
-					display || email
-				) || email;
-
-				if (email) {
-					this.insertText(
-						'<a href="mailto:' + email + '">' + text + '</a>'
-					);
-				}
 			}
 		},
 		link: {
-			txtExec: function (caller, sel) {
-				var display = sel && sel.indexOf('http://') > -1 ? null : sel,
-					url  = prompt(this._('Enter URL:'),
-						(display ? 'http://' : sel)),
-					text = prompt(this._('Enter the displayed text:'),
-						display || url) || url;
+			txtExec: function (caller, selected) {
+				var	editor  = this;
 
-				if (url) {
-					this.insertText(
-						'<a href="' + url + '">' + text + '</a>'
-					);
-				}
+				getEditorCommand('link')._dropDown(
+					editor,
+					caller,
+					function (url, text) {
+						editor.insertText(
+							'<a href="' + url + '">' +
+								(text || selected || url) +
+							'</a>'
+						);
+					}
+				);
 			}
 		},
 		quote: {
-			txtExec: [
-				'<blockquote>',
-				'</blockquote>'
-			]
+			txtExec: ['<blockquote>', '</blockquote>']
 		},
 		youtube: {
 			txtExec: function (caller) {
 				var editor = this;
 
-				SCEditor.command.get('youtube')._dropDown(
+				getEditorCommand('youtube')._dropDown(
 					editor,
 					caller,
-					function (id) {
+					function (id, time) {
 						editor.insertText(
 							'<iframe width="560" height="315" ' +
 							'src="https://www.youtube.com/embed/{id}?' +
-							'wmode=opaque" data-youtube-id="' + id + '" ' +
+							'wmode=opaque&start=' + time + '" ' +
+							'data-youtube-id="' + id + '" ' +
 							'frameborder="0" allowfullscreen></iframe>'
 						);
 					}
@@ -221,16 +197,10 @@
 			}
 		},
 		rtl: {
-			txtExec: [
-				'<div stlye="direction: rtl;">',
-				'</div>'
-			]
+			txtExec: ['<div stlye="direction:rtl;">', '</div>']
 		},
 		ltr: {
-			txtExec: [
-				'<div stlye="direction: ltr;">',
-				'</div>'
-			]
+			txtExec: ['<div stlye="direction:ltr;">', '</div>']
 		}
 	};
 
@@ -241,7 +211,7 @@
 	 * @name jQuery.sceditor.XHTMLSerializer
 	 * @since v1.4.1
 	 */
-	SCEditor.XHTMLSerializer = function () {
+	sceditor.XHTMLSerializer = function () {
 		var base = this;
 
 		var opts = {
@@ -258,42 +228,30 @@
 
 		/**
 		 * Current indention level
-		 * @type {Number}
+		 * @type {number}
 		 * @private
 		 */
 		var currentIndent = 0;
 
-		/**
-		 * @private
-		 */
-		var	escapeEntites,
-			trim,
-			serializeNode,
-			handleDoc,
-			handleElement,
-			handleCdata,
-			handleComment,
-			handleText,
-			output,
-			canIndent;
-// TODO: use escape.entities
+		// TODO: use escape.entities
 		/**
 		 * Escapes XHTML entities
 		 *
-		 * @param  {String} str
-		 * @return {String}
+		 * @param  {string} str
+		 * @return {string}
 		 * @private
 		 */
-		escapeEntites = function (str) {
-			var entites = {
+		function escapeEntities(str) {
+			var entities = {
 				'&': '&amp;',
 				'<': '&lt;',
 				'>': '&gt;',
-				'"': '&quot;'
+				'"': '&quot;',
+				'\xa0': '&nbsp;'
 			};
 
-			return !str ? '' : str.replace(/[&<>"]/g, function (entity) {
-				return entites[entity] || entity;
+			return !str ? '' : str.replace(/[&<>"\xa0]/g, function (entity) {
+				return entities[entity] || entity;
 			});
 		};
 
@@ -302,7 +260,7 @@
 		 * @return {string}
 		 * @private
 		 */
-		trim = function (str) {
+		function trim(str) {
 			return str
 				// New lines will be shown as spaces so just convert to spaces.
 				.replace(/[\r\n]/, ' ')
@@ -313,10 +271,10 @@
 		 * Serializes a node to XHTML
 		 *
 		 * @param  {Node} node            Node to serialize
-		 * @param  {Boolean} onlyChildren If to only serialize the nodes
+		 * @param  {boolean} onlyChildren If to only serialize the nodes
 		 *                                children and not the node
 		 *                                itself
-		 * @return {String}               The serialized node
+		 * @return {string}               The serialized node
 		 * @name serialize
 		 * @memberOf jQuery.sceditor.XHTMLSerializer.prototype
 		 * @since v1.4.1
@@ -342,10 +300,10 @@
 		 * Serializes a node to the outputStringBuilder
 		 *
 		 * @param  {Node} node
-		 * @return {Void}
+		 * @return {void}
 		 * @private
 		 */
-		serializeNode = function (node, parentIsPre) {
+		function serializeNode(node, parentIsPre) {
 			switch (node.nodeType) {
 				case 1: // element
 					var tagName = node.nodeName.toLowerCase();
@@ -392,7 +350,7 @@
 		 * @return {void}
 		 * @private
 		 */
-		handleDoc = function (node) {
+		function handleDoc(node) {
 			var	child = node.firstChild;
 
 			while (child) {
@@ -407,7 +365,7 @@
 		 * @return {void}
 		 * @private
 		 */
-		handleElement = function (node, parentIsPre) {
+		function handleElement(node, parentIsPre) {
 			var	child, attr, attrValue,
 				tagName     = node.nodeName.toLowerCase(),
 				isIframe    = tagName === 'iframe',
@@ -415,11 +373,11 @@
 				firstChild  = node.firstChild,
 				// pre || pre-wrap with any vendor prefix
 				isPre       = parentIsPre ||
-					/pre(?:\-wrap)?$/i.test($(node).css('whiteSpace')),
+					/pre(?:\-wrap)?$/i.test(css(node, 'whiteSpace')),
 				selfClosing = !node.firstChild && !dom.canHaveChildren(node) &&
 					!isIframe;
 
-			if ($(node).hasClass('sceditor-ignore')) {
+			if (is(node, '.sceditor-ignore')) {
 				return;
 			}
 
@@ -427,21 +385,10 @@
 			while (attrIdx--) {
 				attr = node.attributes[attrIdx];
 
-				// IE < 8 returns all possible attributes not just specified
-				// ones. IE < 8 also doesn't say value on input is specified
-				// so just assume it is.
-				if (!SCEditor.ie || attr.specified ||
-					(tagName === 'input' && attr.name === 'value')) {
-					// IE < 8 doesn't return the CSS for the style attribute
-					if (SCEditor.ie < 8 && /style/i.test(attr.name)) {
-						attrValue = node.style.cssText;
-					} else {
-						attrValue = attr.value;
-					}
+				attrValue = attr.value;
 
-					output(' ' + attr.name.toLowerCase() + '="' +
-						escapeEntites(attrValue) + '"', false);
-				}
+				output(' ' + attr.name.toLowerCase() + '="' +
+					escapeEntities(attrValue) + '"', false);
 			}
 			output(selfClosing ? ' />' : '>', false);
 
@@ -473,8 +420,8 @@
 		 * @return {void}
 		 * @private
 		 */
-		handleCdata =  function (node) {
-			output('<![CDATA[' + escapeEntites(node.nodeValue) + ']]>');
+		function handleCdata(node) {
+			output('<![CDATA[' + escapeEntities(node.nodeValue) + ']]>');
 		};
 
 		/**
@@ -483,8 +430,8 @@
 		 * @return {void}
 		 * @private
 		 */
-		handleComment = function (node) {
-			output('<!-- ' + escapeEntites(node.nodeValue) + ' -->');
+		function handleComment(node) {
+			output('<!-- ' + escapeEntities(node.nodeValue) + ' -->');
 		};
 
 		/**
@@ -493,7 +440,7 @@
 		 * @return {void}
 		 * @private
 		 */
-		handleText = function (node, parentIsPre) {
+		function handleText(node, parentIsPre) {
 			var text = node.nodeValue;
 
 			if (!parentIsPre) {
@@ -501,7 +448,7 @@
 			}
 
 			if (text) {
-				output(escapeEntites(text), !parentIsPre && canIndent(node));
+				output(escapeEntities(text), !parentIsPre && canIndent(node));
 			}
 		};
 
@@ -509,12 +456,12 @@
 		 * Adds a string to the outputStringBuilder.
 		 *
 		 * The string will be indented unless indent is set to boolean false.
-		 * @param  {String} str
-		 * @param  {Boolean} indent
+		 * @param  {string} str
+		 * @param  {boolean} indent
 		 * @return {void}
 		 * @private
 		 */
-		output = function (str, indent) {
+		function output(str, indent) {
 			var i = currentIndent;
 
 			if (indent !== false) {
@@ -537,7 +484,7 @@
 		 * @return {boolean}
 		 * @private
 		 */
-		canIndent = function (node) {
+		function canIndent(node) {
 			var prev = node.previousSibling;
 
 			if (node.nodeType !== 1 && prev) {
@@ -559,11 +506,11 @@
 	 * @name jQuery.sceditor.plugins.xhtml
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml = function () {
+	function xhtmlFormat() {
 		var base = this;
 
 		/**
-		 * Tag converstions cache
+		 * Tag converters cache
 		 * @type {Object}
 		 * @private
 		 */
@@ -577,28 +524,15 @@
 		var attrsCache = {};
 
 		/**
-		 * Private methods
-		 * @private
-		 */
-		var	convertTags,
-			convertNode,
-			isEmpty,
-			removeTags,
-			mergeAttribsFilters,
-			removeAttribs,
-			wrapInlines;
-
-
-		/**
 		 * Init
 		 * @return {void}
 		 */
 		base.init = function () {
-			if (!$.isEmptyObject(sceditorPlugins.xhtml.converters || {})) {
-				$.each(
-					sceditorPlugins.xhtml.converters,
+			if (!isEmptyObject(xhtmlFormat.converters || {})) {
+				each(
+					xhtmlFormat.converters,
 					function (idx, converter) {
-						$.each(converter.tags, function (tagname) {
+						each(converter.tags, function (tagname) {
 							if (!tagConvertersCache[tagname]) {
 								tagConvertersCache[tagname] = [];
 							}
@@ -609,83 +543,69 @@
 				);
 			}
 
-			this.commands = $.extend(true,
+			this.commands = extend(true,
 				{}, defaultCommandsOverrides, this.commands);
 		};
 
 		/**
 		 * Converts the WYSIWYG content to XHTML
-		 * @param  {String} html
-		 * @param  {Node} domBody
-		 * @return {String}
+		 * @param  {string} html
+		 * @param  {Document} context
+		 * @param  {HTMLElement} [parent]
+		 * @return {string}
 		 * @memberOf jQuery.sceditor.plugins.xhtml.prototype
 		 */
-		base.signalToSource = function (html, domBody) {
-			domBody = domBody.jquery ? domBody[0] : domBody;
+		base.toSource = function (html, context) {
+			var xhtml,
+				container = context.createElement('div');
+			container.innerHTML = html;
 
-			convertTags(domBody);
-			removeTags(domBody);
-			removeAttribs(domBody);
-			wrapInlines(domBody);
+			css(container, 'visibility', 'hidden');
+			context.body.appendChild(container);
 
-			return (new SCEditor.XHTMLSerializer()).serialize(domBody, true);
+			convertTags(container);
+			removeTags(container);
+			removeAttribs(container);
+			wrapInlines(container);
+
+			xhtml = (new sceditor.XHTMLSerializer()).serialize(container, true);
+
+			context.body.removeChild(container);
+
+			return xhtml;
 		};
 
-		/**
-		 * Converts the XHTML to WYSIWYG content.
-		 *
-		 * This doesn't currently do anything as XHTML
-		 * is valid WYSIWYG content.
-		 * @param  {String} text
-		 * @return {String}
-		 * @memberOf jQuery.sceditor.plugins.xhtml.prototype
-		 */
-		base.signalToWysiwyg = function (text) {
-			return text;
-		};
-
-		/**
-		 * Deprecated, use dom.convertElement() instead.
-		 * @deprecated
-		 */
-		base.convertTagTo = dom.convertElement;
+		base.fragmentToSource = base.toSource;
 
 		/**
 		 * Runs all converters for the specified tagName
 		 * against the DOM node.
-		 * @param  {String} tagName
-		 * @param  {jQuery} $node
+		 * @param  {string} tagName
 		 * @return {Node} node
 		 * @private
 		 */
-		convertNode = function (tagName, $node, node) {
+		function convertNode(tagName, node) {
 			if (!tagConvertersCache[tagName]) {
 				return;
 			}
 
-			$.each(tagConvertersCache[tagName], function (idx, converter) {
+			tagConvertersCache[tagName].forEach(function (converter) {
 				if (converter.tags[tagName]) {
-					$.each(converter.tags[tagName], function (attr, values) {
+					each(converter.tags[tagName], function (attr, values) {
 						if (!node.getAttributeNode) {
 							return;
 						}
 
 						attr = node.getAttributeNode(attr);
 
-						// IE < 8 always returns an attribute regardless of if
-						// it has been specified so must check it.
-						if (!attr || (SCEditor.ie < 8 && !attr.specified)) {
+						if (!attr || values && values.indexOf(attr.value) < 0) {
 							return;
 						}
 
-						if (values && $.inArray(attr.value, values) < 0) {
-							return;
-						}
-
-						converter.conv.call(base, node, $node);
+						converter.conv.call(base, node);
 					});
 				} else if (converter.conv) {
-					converter.conv.call(base, node, $node);
+					converter.conv.call(base, node);
 				}
 			});
 		};
@@ -693,16 +613,15 @@
 		/**
 		 * Converts any tags/attributes to their XHTML equivalents
 		 * @param  {Node} node
-		 * @return {Void}
+		 * @return {void}
 		 * @private
 		 */
-		convertTags = function (node) {
+		function convertTags(node) {
 			dom.traverse(node, function (node) {
-				var	$node   = $(node),
-					tagName = node.nodeName.toLowerCase();
+				var	tagName = node.nodeName.toLowerCase();
 
-				convertNode('*', $node, node);
-				convertNode(tagName, $node, node);
+				convertNode('*', node);
+				convertNode(tagName, node);
 			}, true);
 		};
 
@@ -710,24 +629,28 @@
 		 * Tests if a node is empty and can be removed.
 		 *
 		 * @param  {Node} node
-		 * @return {Boolean}
+		 * @return {boolean}
 		 * @private
 		 */
-		isEmpty = function (node, excludeBr) {
-			var	childNodes     = node.childNodes,
+		function isEmpty(node, excludeBr) {
+			var	rect,
+				childNodes     = node.childNodes,
 				tagName        = node.nodeName.toLowerCase(),
 				nodeValue      = node.nodeValue,
-				childrenLength = childNodes.length;
+				childrenLength = childNodes.length,
+				allowedEmpty   = xhtmlFormat.allowedEmptyTags || [];
 
 			if (excludeBr && tagName === 'br') {
 				return true;
 			}
 
-			if ($(node).hasClass('sceditor-ignore')) {
+			if (is(node, '.sceditor-ignore')) {
 				return true;
 			}
 
-			if (!dom.canHaveChildren(node)) {
+			if (allowedEmpty.indexOf(tagName) > -1 || tagName === 'td' ||
+				!dom.canHaveChildren(node)) {
+
 				return false;
 			}
 
@@ -743,6 +666,13 @@
 				}
 			}
 
+			// Treat tags with a width and height from CSS as not empty
+			if (node.getBoundingClientRect &&
+				(node.className || node.hasAttributes('style'))) {
+				rect = node.getBoundingClientRect();
+				return !rect.width || !rect.height;
+			}
+
 			return true;
 		};
 
@@ -752,10 +682,10 @@
 		 * are black listed.
 		 *
 		 * @param  {Node} rootNode
-		 * @return {Void}
+		 * @return {void}
 		 * @private
 		 */
-		removeTags = function (rootNode) {
+		function removeTags(rootNode) {
 			dom.traverse(rootNode, function (node) {
 				var	remove,
 					tagName         = node.nodeName.toLowerCase(),
@@ -769,8 +699,8 @@
 					empty           = tagName !== 'iframe' && isEmpty(node,
 						isTopLevel && noSiblings && tagName !== 'br'),
 					document        = node.ownerDocument,
-					allowedtags     = sceditorPlugins.xhtml.allowedTags,
-					disallowedTags  = sceditorPlugins.xhtml.disallowedTags;
+					allowedTags     = xhtmlFormat.allowedTags,
+					disallowedTags  = xhtmlFormat.disallowedTags;
 
 				// 3 = text node
 				if (nodeType === 3) {
@@ -786,10 +716,10 @@
 				if (empty) {
 					remove = true;
 				// 3 is text node which do not get filtered
-				} else if (allowedtags && allowedtags.length) {
-					remove = ($.inArray(tagName, allowedtags) < 0);
+				} else if (allowedTags && allowedTags.length) {
+					remove = (allowedTags.indexOf(tagName) < 0);
 				} else if (disallowedTags && disallowedTags.length) {
-					remove = ($.inArray(tagName, disallowedTags) > -1);
+					remove = (disallowedTags.indexOf(tagName) > -1);
 				}
 
 				if (remove) {
@@ -826,20 +756,20 @@
 		 * @return {Object}
 		 * @private
 		 */
-		mergeAttribsFilters = function (filtersA, filtersB) {
+		function mergeAttribsFilters(filtersA, filtersB) {
 			var ret = {};
 
 			if (filtersA) {
-				$.extend(ret, filtersA);
+				extend(ret, filtersA);
 			}
 
 			if (!filtersB) {
 				return ret;
 			}
 
-			$.each(filtersB, function (attrName, values) {
-				if ($.isArray(values)) {
-					ret[attrName] = $.merge(ret[attrName] || [], values);
+			each(filtersB, function (attrName, values) {
+				if (Array.isArray(values)) {
+					ret[attrName] = (ret[attrName] || []).concat(values);
 				} else if (!ret[attrName]) {
 					ret[attrName] = null;
 				}
@@ -855,33 +785,29 @@
 		 * @param {Node} root
 		 * @private
 		 */
-		wrapInlines = function (root) {
-			var adjacentInlines = [];
-			var wrapAdjacents = function () {
-				if (adjacentInlines.length) {
-					$('<p>', root.ownerDocument)
-						.insertBefore(adjacentInlines[0])
-						.append(adjacentInlines);
-
-					adjacentInlines = [];
-				}
-			};
-
+		function wrapInlines(root) {
 			// Strip empty text nodes so they don't get wrapped.
 			dom.removeWhiteSpace(root);
 
+			var wrapper;
 			var node = root.firstChild;
+			var next;
 			while (node) {
-				if (dom.isInline(node) && !$(node).is('.sceditor-ignore')) {
-					adjacentInlines.push(node);
+				next = node.nextSibling;
+
+				if (dom.isInline(node) && !is(node, '.sceditor-ignore')) {
+					if (!wrapper) {
+						wrapper = root.ownerDocument.createElement('p');
+						node.parentNode.insertBefore(wrapper, node);
+					}
+
+					wrapper.appendChild(node);
 				} else {
-					wrapAdjacents();
+					wrapper = null;
 				}
 
-				node = node.nextSibling;
+				node = next;
 			}
-
-			wrapAdjacents();
 		};
 
 		/**
@@ -889,17 +815,17 @@
 		 * if no attributes are white listed it will remove
 		 * any attributes that are black listed.
 		 * @param  {Node} node
-		 * @return {Void}
+		 * @return {void}
 		 * @private
 		 */
-		removeAttribs = function (node) {
+		function removeAttribs(node) {
 			var	tagName, attr, attrName, attrsLength, validValues, remove,
-				allowedAttribs    = sceditorPlugins.xhtml.allowedAttribs,
+				allowedAttribs    = xhtmlFormat.allowedAttribs,
 				isAllowed         = allowedAttribs &&
-					!$.isEmptyObject(allowedAttribs),
-				disallowedAttribs = sceditorPlugins.xhtml.disallowedAttribs,
+					!isEmptyObject(allowedAttribs),
+				disallowedAttribs = xhtmlFormat.disallowedAttribs,
 				isDisallowed      = disallowedAttribs &&
-					!$.isEmptyObject(disallowedAttribs);
+					!isEmptyObject(disallowedAttribs);
 
 			attrsCache = {};
 
@@ -934,12 +860,12 @@
 
 						if (isAllowed) {
 							remove = validValues !== null &&
-								(!$.isArray(validValues) ||
-									$.inArray(attr.value, validValues) < 0);
+								(!Array.isArray(validValues) ||
+									validValues.indexOf(attr.value) < 0);
 						} else if (isDisallowed) {
 							remove = validValues === null ||
-								($.isArray(validValues) &&
-									$.inArray(attr.value, validValues) > -1);
+								(Array.isArray(validValues) &&
+									validValues.indexOf(attr.value) > -1);
 						}
 
 						if (remove) {
@@ -958,15 +884,16 @@
 	 * @name jQuery.sceditor.plugins.xhtml.converters
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml.converters = [
+	xhtmlFormat.converters = [
 		{
 			tags: {
 				'*': {
 					width: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('width', $node.attr('width')).removeAttr('width');
+			conv: function (node) {
+				css(node, 'width', attr(node, 'width'));
+				removeAttr(node, 'width');
 			}
 		},
 		{
@@ -975,8 +902,9 @@
 					height: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('height', $node.attr('height')).removeAttr('height');
+			conv: function (node) {
+				css(node, 'height', attr(node, 'height'));
+				removeAttr(node, 'height');
 			}
 		},
 		{
@@ -985,12 +913,8 @@
 					value: null
 				}
 			},
-			conv: function (node, $node) {
-				if (SCEditor.ie < 8) {
-					node.removeAttribute('value');
-				} else {
-					$node.removeAttr('value');
-				}
+			conv: function (node) {
+				removeAttr(node, 'value');
 			}
 		},
 		{
@@ -999,8 +923,9 @@
 					text: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('color', $node.attr('text')).removeAttr('text');
+			conv: function (node) {
+				css(node, 'color', attr(node, 'text'));
+				removeAttr(node, 'text');
 			}
 		},
 		{
@@ -1009,8 +934,9 @@
 					color: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('color', $node.attr('color')).removeAttr('color');
+			conv: function (node) {
+				css(node, 'color', attr(node, 'color'));
+				removeAttr(node, 'color');
 			}
 		},
 		{
@@ -1019,8 +945,9 @@
 					face: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('fontFamily', $node.attr('face')).removeAttr('face');
+			conv: function (node) {
+				css(node, 'fontFamily', attr(node, 'face'));
+				removeAttr(node, 'face');
 			}
 		},
 		{
@@ -1029,8 +956,9 @@
 					align: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('textAlign', $node.attr('align')).removeAttr('align');
+			conv: function (node) {
+				css(node, 'textAlign', attr(node, 'align'));
+				removeAttr(node, 'align');
 			}
 		},
 		{
@@ -1039,10 +967,9 @@
 					border: null
 				}
 			},
-			conv: function (node, $node) {
-				$node
-					.css('borderWidth',$node.attr('border'))
-					.removeAttr('border');
+			conv: function (node) {
+				css(node, 'borderWidth', attr(node, 'border'));
+				removeAttr(node, 'border');
 			}
 		},
 		{
@@ -1066,12 +993,12 @@
 					name: null
 				}
 			},
-			conv: function (node, $node) {
-				if (!$node.attr('id')) {
-					$node.attr('id', $node.attr('name'));
+			conv: function (node) {
+				if (!attr(node, 'id')) {
+					attr(node, 'id', attr(node, 'name'));
 				}
 
-				$node.removeAttr('name');
+				removeAttr(node, 'name');
 			}
 		},
 		{
@@ -1080,11 +1007,10 @@
 					vspace: null
 				}
 			},
-			conv: function (node, $node) {
-				$node
-					.css('marginTop', $node.attr('vspace') - 0)
-					.css('marginBottom', $node.attr('vspace') - 0)
-					.removeAttr('vspace');
+			conv: function (node) {
+				css(node, 'marginTop', attr(node, 'vspace') - 0);
+				css(node, 'marginBottom', attr(node, 'vspace') - 0);
+				removeAttr(node, 'vspace');
 			}
 		},
 		{
@@ -1093,11 +1019,10 @@
 					hspace: null
 				}
 			},
-			conv: function (node, $node) {
-				$node
-					.css('marginLeft', $node.attr('hspace') - 0)
-					.css('marginRight', $node.attr('hspace') - 0)
-					.removeAttr('hspace');
+			conv: function (node) {
+				css(node, 'marginLeft', attr(node, 'hspace') - 0);
+				css(node, 'marginRight', attr(node, 'hspace') - 0);
+				removeAttr(node, 'hspace');
 			}
 		},
 		{
@@ -1106,8 +1031,9 @@
 					noshade: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('borderStyle', 'solid').removeAttr('noshade');
+			conv: function (node) {
+				css(node, 'borderStyle', 'solid');
+				removeAttr(node, 'noshade');
 			}
 		},
 		{
@@ -1116,8 +1042,9 @@
 					nowrap: null
 				}
 			},
-			conv: function (node, $node) {
-				$node.css('white-space', 'nowrap').removeAttr('nowrap');
+			conv: function (node) {
+				css(node, 'whiteSpace', 'nowrap');
+				removeAttr(node, 'nowrap');
 			}
 		},
 		{
@@ -1125,7 +1052,7 @@
 				big: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'span')).css('fontSize', 'larger');
+				css(convertElement(node, 'span'), 'fontSize', 'larger');
 			}
 		},
 		{
@@ -1133,7 +1060,7 @@
 				small: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'span')).css('fontSize', 'smaller');
+				css(convertElement(node, 'span'), 'fontSize', 'smaller');
 			}
 		},
 		{
@@ -1141,7 +1068,7 @@
 				b: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'strong'));
+				convertElement(node, 'strong');
 			}
 		},
 		{
@@ -1149,16 +1076,8 @@
 				u: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'span'))
-					.css('textDecoration', 'underline');
-			}
-		},
-		{
-			tags: {
-				i: null
-			},
-			conv: function (node) {
-				$(this.convertTagTo(node, 'em'));
+				css(convertElement(node, 'span'), 'textDecoration',
+					'underline');
 			}
 		},
 		{
@@ -1167,8 +1086,8 @@
 				strike: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'span'))
-					.css('textDecoration', 'line-through');
+				css(convertElement(node, 'span'), 'textDecoration',
+					'line-through');
 			}
 		},
 		{
@@ -1176,7 +1095,7 @@
 				dir: null
 			},
 			conv: function (node) {
-				this.convertTagTo(node, 'ul');
+				convertElement(node, 'ul');
 			}
 		},
 		{
@@ -1184,8 +1103,7 @@
 				center: null
 			},
 			conv: function (node) {
-				$(this.convertTagTo(node, 'div'))
-					.css('textAlign', 'center');
+				css(convertElement(node, 'div'), 'textAlign', 'center');
 			}
 		},
 		{
@@ -1194,42 +1112,9 @@
 					size: null
 				}
 			},
-			conv: function (node, $node) {
-				var	size     = $node.css('fontSize'),
-					fontSize = size;
-
-				// IE < 8 sets a font tag with no size to +0 so
-				// should just skip it.
-				if (fontSize !== '+0') {
-					// IE 8 and below incorrectly returns the value of the size
-					// attribute instead of the px value so must convert it
-					if (SCEditor.ie < 9) {
-						fontSize = 10;
-
-						if (size > 1) {
-							fontSize = 13;
-						}
-						if (size > 2) {
-							fontSize = 16;
-						}
-						if (size > 3) {
-							fontSize = 18;
-						}
-						if (size > 4) {
-							fontSize = 24;
-						}
-						if (size > 5) {
-							fontSize = 32;
-						}
-						if (size > 6) {
-							fontSize = 48;
-						}
-					}
-
-					$node.css('fontSize', fontSize);
-				}
-
-				$node.removeAttr('size');
+			conv: function (node) {
+				css(node, 'fontSize', css(node, 'fontSize'));
+				removeAttr(node, 'size');
 			}
 		},
 		{
@@ -1239,7 +1124,7 @@
 			conv: function (node) {
 				// All it's attributes will be converted
 				// by the attribute converters
-				this.convertTagTo(node, 'span');
+				convertElement(node, 'span');
 			}
 		},
 		{
@@ -1248,8 +1133,8 @@
 					type: ['_moz']
 				}
 			},
-			conv: function (node, $node) {
-				$node.removeAttr('type');
+			conv: function (node) {
+				removeAttr(node, 'type');
 			}
 		},
 		{
@@ -1258,8 +1143,8 @@
 					'_moz_dirty': null
 				}
 			},
-			conv: function (node, $node) {
-				$node.removeAttr('_moz_dirty');
+			conv: function (node) {
+				removeAttr(node, '_moz_dirty');
 			}
 		},
 		{
@@ -1268,8 +1153,8 @@
 					'_moz_editor_bogus_node': null
 				}
 			},
-			conv: function (node, $node) {
-				$node.remove();
+			conv: function (node) {
+				node.parentNode.removeChild(node);
 			}
 		}
 	];
@@ -1285,7 +1170,7 @@
 	 * @name jQuery.sceditor.plugins.xhtml.allowedAttribs
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml.allowedAttribs = {};
+	xhtmlFormat.allowedAttribs = {};
 
 	/**
 	 * Attributes that are not allowed.
@@ -1295,7 +1180,7 @@
 	 * @name jQuery.sceditor.plugins.xhtml.disallowedAttribs
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml.disallowedAttribs = {};
+	xhtmlFormat.disallowedAttribs = {};
 
 	/**
 	 * Array containing all the allowed tags.
@@ -1305,7 +1190,7 @@
 	 * @name jQuery.sceditor.plugins.xhtml.allowedTags
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml.allowedTags = [];
+	xhtmlFormat.allowedTags = [];
 
 	/**
 	 * Array containing all the disallowed tags.
@@ -1315,5 +1200,16 @@
 	 * @name jQuery.sceditor.plugins.xhtml.disallowedTags
 	 * @since v1.4.1
 	 */
-	sceditorPlugins.xhtml.disallowedTags = [];
-}(jQuery));
+	xhtmlFormat.disallowedTags = [];
+
+	/**
+	 * Array containing tags which should not be removed when empty.
+	 *
+	 * @type {Array}
+	 * @name jQuery.sceditor.plugins.xhtml.allowedEmptyTags
+	 * @since v2.0.0
+	 */
+	xhtmlFormat.allowedEmptyTags = [];
+
+	sceditor.formats.xhtml = xhtmlFormat;
+}(sceditor));
