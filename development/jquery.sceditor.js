@@ -998,6 +998,7 @@
 				while (hasClass(previous, 'sceditor-ignore')) {
 					previous = getSibling(previous, true);
 				}
+
 				// If previous sibling isn't inline or is a textnode that
 				// ends in whitespace, time the start whitespace
 				if (isInline(node) && previous) {
@@ -1005,6 +1006,11 @@
 
 					while (previousSibling.lastChild) {
 						previousSibling = previousSibling.lastChild;
+
+						// eslint-disable-next-line max-depth
+						while (hasClass(previousSibling, 'sceditor-ignore')) {
+							previousSibling = getSibling(previousSibling, true);
+						}
 					}
 
 					trimStart = previousSibling.nodeType === TEXT_NODE ?
@@ -1796,17 +1802,17 @@
 
 		image:
 			'<div><label for="link">{url}</label> ' +
-				'<input type="text" id="image" placeholder="https://" /></div>' +
+				'<input type="text" id="image" dir="ltr" placeholder="https://" /></div>' +
 			'<div><label for="width">{width}</label> ' +
-				'<input type="text" id="width" size="2" /></div>' +
+				'<input type="text" id="width" size="2" dir="ltr" /></div>' +
 			'<div><label for="height">{height}</label> ' +
-				'<input type="text" id="height" size="2" /></div>' +
+				'<input type="text" id="height" size="2" dir="ltr" /></div>' +
 			'<div><input type="button" class="button" value="{insert}" />' +
 				'</div>',
 
 		email:
 			'<div><label for="email">{label}</label> ' +
-				'<input type="text" id="email" /></div>' +
+				'<input type="text" id="email" dir="ltr" /></div>' +
 			'<div><label for="des">{desc}</label> ' +
 				'<input type="text" id="des" /></div>' +
 			'<div><input type="button" class="button" value="{insert}" />' +
@@ -1814,14 +1820,14 @@
 
 		link:
 			'<div><label for="link">{url}</label> ' +
-				'<input type="text" id="link" placeholder="https://" /></div>' +
+				'<input type="text" id="link" dir="ltr" placeholder="https://" /></div>' +
 			'<div><label for="des">{desc}</label> ' +
 				'<input type="text" id="des" /></div>' +
 			'<div><input type="button" class="button" value="{ins}" /></div>',
 
 		youtubeMenu:
 			'<div><label for="link">{label}</label> ' +
-				'<input type="text" id="link" placeholder="https://" /></div>' +
+				'<input type="text" id="link" dir="ltr" placeholder="https://" /></div>' +
 			'<div><input type="button" class="button" value="{insert}" />' +
 				'</div>',
 
@@ -2504,7 +2510,9 @@
 
 				var createContent = function (includeMore) {
 					var	moreLink,
-						emoticonsCompat = editor.opts.emoticonsCompat,
+						opts            = editor.opts,
+						emoticonsRoot   = opts.emoticonsRoot || '',
+						emoticonsCompat = opts.emoticonsCompat,
 						rangeHelper     = editor.getRangeHelper(),
 						startSpace      = emoticonsCompat &&
 							rangeHelper.getOuterText(true, 1) !== ' ' ? ' ' : '',
@@ -2515,8 +2523,8 @@
 						perLine         = 0,
 						emoticons       = extend(
 							{},
-							editor.opts.emoticons.dropdown,
-							includeMore ? editor.opts.emoticons.more : {}
+							opts.emoticons.dropdown,
+							includeMore ? opts.emoticons.more : {}
 						);
 
 					appendChild(content, line);
@@ -2532,7 +2540,7 @@
 
 					each(emoticons, function (code, emoticon) {
 						appendChild(line, createElement('img', {
-							src: emoticon.url || emoticon,
+							src: emoticonsRoot + (emoticon.url || emoticon),
 							alt: code,
 							title: emoticon.tooltip || code
 						}));
@@ -2543,7 +2551,7 @@
 						}
 					});
 
-					if (!includeMore && editor.opts.emoticons.more) {
+					if (!includeMore && opts.emoticons.more) {
 						moreLink = createElement('a', {
 							className: 'sceditor-more'
 						});
@@ -3188,8 +3196,8 @@
 			}
 
 			if (canHaveChildren(lastChild)) {
-				// IE <= 8 and Webkit won't allow the cursor to be placed
-				// inside an empty tag, so add a zero width space to it.
+				// Webkit won't allow the cursor to be placed inside an
+				// empty tag, so add a zero width space to it.
 				if (!lastChild.lastChild) {
 					appendChild(lastChild, document.createTextNode('\u200B'));
 				}
@@ -3255,10 +3263,7 @@
 		};
 
 		/**
-		 * <p>Clones the selected Range</p>
-		 *
-		 * <p>IE <= 8 will return a TextRange, all other browsers
-		 * will return a Range object.</p>
+		 * Clones the selected Range
 		 *
 		 * @return {Range}
 		 * @function
@@ -3274,10 +3279,7 @@
 		};
 
 		/**
-		 * <p>Gets the selected Range</p>
-		 *
-		 * <p>IE <= 8 will return a TextRange, all other browsers
-		 * will return a Range object.</p>
+		 * Gets the selected Range
 		 *
 		 * @return {Range}
 		 * @function
@@ -3294,7 +3296,7 @@
 
 			// When creating a new range, set the start to the first child
 			// element of the body element to avoid errors in FF.
-			if (sel.getRangeAt && sel.rangeCount <= 0) {
+			if (sel.rangeCount <= 0) {
 				firstChild = doc.body;
 				while (firstChild.firstChild) {
 					firstChild = firstChild.firstChild;
