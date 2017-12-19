@@ -73,7 +73,8 @@
 				// Skip undefined values to match jQuery and
 				// skip if target to prevent infinite loop
 				if (!isUndefined(value)) {
-					var isObject = value !== null && typeof value === 'object';
+					var isObject = value !== null && typeof value === 'object' &&
+						Object.getPrototypeOf(value) === Object.prototype;
 					var isArray = Array.isArray(value);
 
 					if (isDeep && (isObject || isArray)) {
@@ -1832,7 +1833,7 @@
 				'</div>',
 
 		youtube:
-			'<iframe width="560" height="315" frameborder="0" allowfullscreen' +
+			'<iframe width="560" height="315" frameborder="0" allowfullscreen ' +
 			'src="https://www.youtube.com/embed/{id}?wmode=opaque&start={time}" ' +
 			'data-youtube-id="{id}"></iframe>'
 	};
@@ -4042,6 +4043,14 @@
 		var wysiwygEditor;
 
 		/**
+		 * The editors window
+		 *
+		 * @type {Window}
+		 * @private
+		 */
+		var wysiwygWindow;
+
+		/**
 		 * The WYSIWYG editors body element
 		 *
 		 * @type {HTMLBodyElement}
@@ -4474,6 +4483,7 @@
 			wysiwygDocument.close();
 
 			wysiwygBody = wysiwygDocument.body;
+			wysiwygWindow = wysiwygEditor.contentWindow;
 
 			base.readOnly(!!options.readOnly);
 
@@ -4491,7 +4501,7 @@
 			attr(sourceEditor, 'tabindex', tabIndex);
 			attr(wysiwygEditor, 'tabindex', tabIndex);
 
-			rangeHelper = new RangeHelper(wysiwygEditor.contentWindow);
+			rangeHelper = new RangeHelper(wysiwygWindow);
 
 			// load any textarea value into the editor
 			hide(original);
@@ -6190,9 +6200,13 @@
 		 */
 		checkSelectionChanged = function () {
 			function check() {
+				// Don't create new selection if there isn't one (like after
+				// blur event in iOS)
+				if (wysiwygWindow.getSelection().rangeCount <= 0) {
+					currentSelection = null;
 				// rangeHelper could be null if editor was destroyed
 				// before the timeout had finished
-				if (rangeHelper && !rangeHelper.compare(currentSelection)) {
+				} else if (rangeHelper && !rangeHelper.compare(currentSelection)) {
 					currentSelection = rangeHelper.cloneSelected();
 
 					// If the selection is in an inline wrap it in a block.
@@ -6671,8 +6685,8 @@
 					return;
 				}
 
-				var container,
-					rng = rangeHelper.selectedRange();
+				var container;
+				var rng = rangeHelper.selectedRange();
 
 				// Fix FF bug where it shows the cursor in the wrong place
 				// if the editor hasn't had focus before. See issue #393
@@ -6694,7 +6708,7 @@
 					}
 				}
 
-				wysiwygEditor.contentWindow.focus();
+				wysiwygWindow.focus();
 				wysiwygBody.focus();
 
 				// Needed for IE
@@ -8160,13 +8174,15 @@
 
 		/**
 		 * Converts the WYSIWYG content to XHTML
+		 *
+		 * @param  {boolean} isFragment
 		 * @param  {string} html
 		 * @param  {Document} context
 		 * @param  {HTMLElement} [parent]
 		 * @return {string}
 		 * @memberOf jQuery.sceditor.plugins.xhtml.prototype
 		 */
-		base.toSource = function (html, context) {
+		function toSource(isFragment, html, context) {
 			var xhtml,
 				container = context.createElement('div');
 			container.innerHTML = html;
@@ -8177,7 +8193,10 @@
 			convertTags(container);
 			removeTags(container);
 			removeAttribs(container);
-			wrapInlines(container);
+
+			if (!isFragment) {
+				wrapInlines(container);
+			}
 
 			xhtml = (new sceditor.XHTMLSerializer()).serialize(container, true);
 
@@ -8186,7 +8205,9 @@
 			return xhtml;
 		};
 
-		base.fragmentToSource = base.toSource;
+		base.toSource = toSource.bind(null, false);
+
+		base.fragmentToSource = toSource.bind(null, true);;
 
 		/**
 		 * Runs all converters for the specified tagName
