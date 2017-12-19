@@ -14,9 +14,6 @@
       "email": "sam@samclarkes.com"
     }
   ],
-  "require": {
-    "components/jquery": ">= 2.1.0"
-  },
   "extra": {
     "component": {
       "scripts": [
